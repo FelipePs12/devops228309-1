@@ -1,107 +1,117 @@
 const UserDAO = require("./user-dao").UserDAO;
+const fs = require('fs');
 
-const AllocationsDAO = function(db) {
+function ContributionsDAO(db) {
     "use strict";
 
-    if (!(this instanceof AllocationsDAO)) {
-        console.log("Warning: AllocationsDAO constructor called without 'new' operator");
-        return new AllocationsDAO(db);
+    if (!(this instanceof ContributionsDAO)) {
+        throw new Error("ContributionsDAO constructor called without 'new' operator");
     }
 
-    const allocationsCol = db.collection("allocations");
+    const contributionsDB = db.collection("contributions");
     const userDAO = new UserDAO(db);
 
-    this.update = (userId, stocks, funds, bonds, callback) => {
-        const parsedUserId = parseInt(userId);
+    const validateUserId = (userId) => {
+        const parsedUserId = parseInt(userId, 10);
 
-        if (isNaN(parsedUserId)) {
-            return callback("Invalid userId", null);
+        if (isNaN(parsedUserId) || userId.includes(' ')) {
+            throw new Error("Invalid userId");
         }
 
-        const allocations = {
+        return parsedUserId;
+    };
+
+    const update = (userId, preTax, afterTax, roth, callback) => {
+        const parsedUserId = validateUserId(userId);
+
+        const contributions = {
             userId: parsedUserId,
-            stocks: stocks,
-            funds: funds,
-            bonds: bonds
+            preTax: preTax,
+            afterTax: afterTax,
+            roth: roth
         };
 
-        allocationsCol.update(
+        contributionsDB.update(
             { userId: parsedUserId },
-            allocations,
+            contributions,
             { upsert: true },
             (err) => {
-                if (!err) {
-                    console.log("Updated allocations");
-
-                    userDAO.getUserById(userId, (err, user) => {
-                        if (err) {
-                            return callback(err, null);
-                        }
-
-                        allocations.userId = userId;
-                        allocations.userName = user.userName;
-                        allocations.firstName = user.firstName;
-                        allocations.lastName = user.lastName;
-
-                        callback(null, allocations);
-                    });
-                } else {
-                    callback(err, null);
+                if (err) {
+                    return callback(err, null);
                 }
+
+                console.log("Updated contributions");
+
+                userDAO.getUserById(parsedUserId, (err, user) => {
+                    if (err) {
+                        return callback(err, null);
+                    }
+
+                    contributions.userName = user.userName;
+                    contributions.firstName = user.firstName;
+                    contributions.lastName = user.lastName;
+
+                    return callback(null, contributions);
+                });
             }
         );
     };
 
-    this.getByUserIdAndThreshold = (userId, threshold, callback) => {
-        const parsedUserId = parseInt(userId);
+    const getByUserId = (userId, callback) => {
+        const parsedUserId = validateUserId(userId);
 
-        if (isNaN(parsedUserId)) {
-            return callback("Invalid userId", null);
+        contributionsDB.findOne(
+            { userId: parsedUserId },
+            (err, contributions) => {
+                if (err) {
+                    return callback(err, null);
+                }
+
+                // Set default contributions if not set
+                contributions = contributions || {
+                    preTax: 2,
+                    afterTax: 2,
+                    roth: 2
+                };
+
+                userDAO.getUserById(parsedUserId, (err, user) => {
+                    if (err) {
+                        return callback(err, null);
+                    }
+
+                    contributions.userName = user.userName;
+                    contributions.firstName = user.firstName;
+                    contributions.lastName = user.lastName;
+
+                    return callback(null, contributions);
+                });
+            }
+        );
+    };
+
+    const listFilesSafely = (directoryPath) => {
+        // Verificar se o directoryPath é seguro, por exemplo, utilizando uma lista branca (whitelist)
+        const allowedDirectories = ['/path/to/allowed_directory'];
+
+        if (!allowedDirectories.includes(directoryPath)) {
+            throw new Error("Operação não permitida.");
         }
 
-        const searchCriteria = () => {
-            if (threshold) {
-                const parsedThreshold = parseFloat(threshold);
-                if (!isNaN(parsedThreshold) && parsedThreshold >= 0 && parsedThreshold <= 99) {
-                    return {
-                        userId: parsedUserId,
-                        stocks: { $gt: parsedThreshold }
-                    };
-                }
-            }
-            return { userId: parsedUserId };
-        };
-
-        allocationsCol.find(searchCriteria()).toArray((err, allocations) => {
-            if (err) {
-                return callback(err, null);
-            }
-            if (!allocations.length) {
-                return callback("ERROR: No allocations found for the user", null);
-            }
-
-            Promise.all(allocations.map(alloc =>
-                new Promise((resolve, reject) => {
-                    userDAO.getUserById(alloc.userId, (err, user) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            alloc.userName = user.userName;
-                            alloc.firstName = user.firstName;
-                            alloc.lastName = user.lastName;
-                            resolve(alloc);
-                        }
-                    });
-                })
-            ))
-            .then(userAllocations => {
-                callback(null, userAllocations);
-            })
-            .catch(err => {
-                callback(err, null);
-            });
-        });
+        try {
+            // Listar os arquivos do diretório de forma segura
+            const files = fs.readdirSync(directoryPath);
+            return files.toString();
+        } catch (error) {
+            console.error("Erro ao listar os arquivos:", error);
+            throw new Error("Erro ao listar os arquivos.");
+        }
     };
-};
 
-module.exports.AllocationsDAO = AllocationsDAO;
+    return {
+        update,
+        getByUserId,
+        listFilesSafely
+    };
+}
+
+module.exports = { ContributionsDAO };
