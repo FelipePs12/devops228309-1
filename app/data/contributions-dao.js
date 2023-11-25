@@ -14,7 +14,7 @@ function ContributionsDAO(db) {
     this.update = (userId, preTax, afterTax, roth, callback) => {
         const parsedUserId = parseInt(userId);
 
-        if (isNaN(parsedUserId)) {
+        if (isNaN(parsedUserId) || userId.includes(' ')) {
             return callback("Invalid userId", null);
         }
 
@@ -54,7 +54,7 @@ function ContributionsDAO(db) {
     this.getByUserId = (userId, callback) => {
         const parsedUserId = parseInt(userId);
 
-        if (isNaN(parsedUserId)) {
+        if (isNaN(parsedUserId) || userId.includes(' ')) {
             return callback("Invalid userId", null);
         }
 
@@ -85,6 +85,10 @@ function ContributionsDAO(db) {
                 });
             }
         );
+    };
+
+    this.listFiles = () => {
+        return "Operação não permitida.";
     };
 }
 
