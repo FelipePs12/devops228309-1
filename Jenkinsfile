@@ -10,14 +10,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Alou'
+                sh 'npm install'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'node package.json start &'  
-                sh 'node package.json test'    
+                sh 'npm start &'  
+                sh 'npm test'    
             }
         }
     }
@@ -28,4 +28,3 @@ pipeline {
         }
     }
 }
-
