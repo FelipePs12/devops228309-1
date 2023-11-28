@@ -2,19 +2,27 @@ pipeline {
     agent any
 
     stages {
-        stage('Preparar Ambiente') {
+        stage('Checkout') {
             steps {
-                sh 'npm --version'
-                sh 'node --version'
-                sh 'npm install'
+                checkout scm
             }
         }
 
-        stage('Testes') {
+        stage('Build and Test') {
             steps {
-                sh 'npm test'
+                sh 'npm install' 
+
+                sh 'npm start &'
+                sleep 10  
+
+                sh 'npm test' 
             }
         }
+    }
 
+    post {
+        always {
+            sh 'pkill node'
+        }
     }
 }
