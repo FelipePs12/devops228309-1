@@ -8,21 +8,23 @@ pipeline {
             }
         }
 
-        stage('Build and Test') {
+        stage('Build') {
             steps {
-                sh 'npm install' 
+                sh 'npm install'
+            }
+        }
 
-                sh 'npm start &'
-                sleep 10  
-
-                sh 'npm test' 
+        stage('Test') {
+            steps {
+                sh 'npm start &'  
+                sh 'npm test'    
             }
         }
     }
 
     post {
         always {
-            sh 'pkill node'
+            sh 'pkill -f "node goat"' 
         }
     }
 }
