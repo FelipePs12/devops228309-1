@@ -1,16 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        VERACODE_APP_NAME = 'NodeGoat'  
-    }
-
-
-    options {
-
-        buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '20'))
-    }
-
     stages{
         stage ('environment verify') {
             steps {
@@ -31,7 +21,7 @@ pipeline {
         stage ('build') {
             steps {
 
-                nodejs(nodeJSInstallationName: 'NodeJS-12.0.0') {
+                nodejs(nodeJSInstallationName: 'NodeJS-21.2.0') {
                     script {
                         if(isUnix() == true) {
 
@@ -79,7 +69,7 @@ pipeline {
             steps {
                 echo 'Veracode SCA'
                 withCredentials([ string(credentialsId: 'SCA_Token', variable: 'SRCCLR_API_TOKEN')]) {
-                    nodejs(nodeJSInstallationName: 'NodeJS-12.0.0') {
+                    nodejs(nodeJSInstallationName: 'NodeJS-21.2.0') {
                         script {
                             if(isUnix() == true) {
                                 sh "curl -sSL https://download.sourceclear.com/ci.sh | sh"
