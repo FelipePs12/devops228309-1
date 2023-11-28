@@ -7,7 +7,7 @@ pipeline{
                 sh '''
                 docker info
                 docker version
-                docker compose version
+                docker composer version
                 java --version
                 '''
             }
