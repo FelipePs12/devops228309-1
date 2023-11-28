@@ -14,8 +14,8 @@ pipeline {
                         }
                         else {
 
-                            bat 'npm --version'
-                            bat 'npm install --no-save'  
+                            sh 'npm --version'
+                            sh 'npm install --no-save'  
                         }
                     }
 
