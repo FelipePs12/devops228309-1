@@ -1,17 +1,20 @@
-pipeline{
+pipeline {
     agent any
 
     stages {
-        stage('Build TADS') {
+        stage('Preparar Ambiente') {
             steps {
-                sh '''
-                docker info
-                docker version
-                docker compose version
-                java --version
-                '''
+                sh 'npm --version'
+                sh 'node --version'
+                sh 'npm install'
             }
         }
-    }
 
+        stage('Testes') {
+            steps {
+                sh 'npm test'
+            }
+        }
+
+    }
 }
