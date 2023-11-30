@@ -1,19 +1,14 @@
 pipeline {
     agent any
 
-    stages{
-        stage ('build') {
+    stages {
+        stage('Executar Testes') {
             steps {
-
-                nodejs(nodeJSInstallationName: 'NodeJS-21.2.0') {
-                    script {
-                            sh 'npm install'
-                            sh 'npm install --no-save'  
-                        
-                    }
-
-                }
+                
+                sh 'docker exec devops228309-1-web-1 npm test'
             }
         }
+
+        // Adicione mais estágios conforme necessário para sua pipeline
     }
 }
