@@ -1,7 +1,16 @@
 pipeline {
     agent any
 
+    
     stages {
+            post {
+        success {
+            echo 'Pipeline bem-sucedida! Envie notificações aqui.'
+        }
+        failure {
+            echo 'Pipeline falhou! Envie notificações aqui.'
+        }
+    }
 
             stage('Instalar Dependências') {
         steps {
@@ -14,7 +23,10 @@ pipeline {
                 sh 'docker exec devops228309-1-web-1 npm test'
             }
         }
-
-        // Adicione mais estágios conforme necessário para sua pipeline
+        post {
+            always {
+            sh 'docker rm -f devops228309-1-web-1'
+        }
+    }
     }
 }
