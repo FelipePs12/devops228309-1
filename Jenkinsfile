@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     stages {
-        stage('Instalar Dependências') {
+        stage('Dependências') {
             steps {
-                sh 'npm install'
+                sh '/mnt/c/Program Files/nodejs//npm'
             }
         }
 
-        stage('Executar Testes') {
+        stage('Testes') {
             steps {
                 sh 'docker exec devops228309-1-web-1 npm test'
             }
