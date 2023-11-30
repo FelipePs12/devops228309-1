@@ -5,7 +5,7 @@ pipeline {
         stage('Instalar Dependências') {
             steps {
 
-                sh '/mnt/c/Program\\ /home/felipesilva/Projetos/devops228309-1'
+                sh 'cd /home/felipesilva/Projetos/devops228309-1'
                 sh '/mnt/c/Program\\ Files/nodejs/npm install'
             }
         }
