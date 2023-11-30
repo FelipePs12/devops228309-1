@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     stages {
-        stage('Dependências') {
+        stage('Instalar Dependências') {
             steps {
-                sh '/mnt/c/Program Files/nodejs//npm'
+                sh '/mnt/c/Program\\ Files/nodejs/npm install'
             }
         }
 
